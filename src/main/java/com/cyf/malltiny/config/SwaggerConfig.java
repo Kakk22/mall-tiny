@@ -2,11 +2,15 @@ package com.cyf.malltiny.config;
 
 import com.cyf.malltiny.common.config.BaseSwaggerConfig;
 import com.cyf.malltiny.common.domain.SwaggerProperties;
+import org.springframework.context.annotation.Configuration;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**Swagger API文档相关配置
  * @author by cyf
  * @date 2020/9/13.
  */
+@Configuration
+@EnableSwagger2
 public class SwaggerConfig extends BaseSwaggerConfig {
 
     @Override

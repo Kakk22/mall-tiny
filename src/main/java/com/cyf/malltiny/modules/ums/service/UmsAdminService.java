@@ -2,6 +2,7 @@ package com.cyf.malltiny.modules.ums.service;
 
 import com.cyf.malltiny.modules.ums.model.UmsAdmin;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  * <p>
@@ -13,4 +14,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface UmsAdminService extends IService<UmsAdmin> {
 
+    UserDetails loadUserByUsername(String username);
 }
