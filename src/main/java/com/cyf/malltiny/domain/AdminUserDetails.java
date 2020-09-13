@@ -19,6 +19,11 @@ public class AdminUserDetails implements UserDetails {
     private UmsAdmin umsAdmin;
     private List<UmsResource> resourceList;
 
+    public AdminUserDetails(UmsAdmin umsAdmin, List<UmsResource> resourceList) {
+        this.umsAdmin = umsAdmin;
+        this.resourceList = resourceList;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         //返回当前用户的角色
