@@ -5,6 +5,7 @@ import com.cyf.malltiny.modules.ums.dto.UmsAdminLoginParam;
 import com.cyf.malltiny.modules.ums.model.UmsAdmin;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.cyf.malltiny.modules.ums.model.UmsResource;
+import com.cyf.malltiny.modules.ums.model.UmsRole;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -20,6 +21,12 @@ import java.util.List;
  */
 public interface UmsAdminService extends IService<UmsAdmin> {
 
+    /**
+     * 根据用户id获取用户角色
+     * @param adminId 用户id
+     * @return  用户角色
+     */
+    List<UmsRole> getRoleList(Long adminId);
 
     /**
      * 根据姓名或用户名获取用户列表

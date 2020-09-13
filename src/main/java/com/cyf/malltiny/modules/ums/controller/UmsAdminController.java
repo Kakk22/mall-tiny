@@ -6,6 +6,7 @@ import com.cyf.malltiny.common.api.CommonPage;
 import com.cyf.malltiny.common.api.CommonResult;
 import com.cyf.malltiny.modules.ums.dto.UmsAdminLoginParam;
 import com.cyf.malltiny.modules.ums.model.UmsAdmin;
+import com.cyf.malltiny.modules.ums.model.UmsRole;
 import com.cyf.malltiny.modules.ums.service.UmsAdminService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -15,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * <p>
@@ -53,6 +55,13 @@ public class UmsAdminController {
                              @RequestParam(defaultValue = "1") Integer pageNum){
         Page<UmsAdmin> list = umsAdminService.list(keyword, pageSize, pageNum);
         return  CommonResult.success(CommonPage.restPage(list));
+    }
+
+    @ApiOperation("查询用户角色")
+    @GetMapping(value = "/role/{adminId}")
+    public CommonResult role(@PathVariable Long adminId){
+        List<UmsRole> roleList = umsAdminService.getRoleList(adminId);
+        return CommonResult.success(roleList);
     }
 }
 

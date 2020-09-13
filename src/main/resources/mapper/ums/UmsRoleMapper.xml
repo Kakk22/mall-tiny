@@ -12,5 +12,19 @@
         <result column="status" property="status" />
         <result column="sort" property="sort" />
     </resultMap>
+    <select id="getRoleList" resultType="com.cyf.malltiny.modules.ums.model.UmsRole">
+        select
+          r.id id,
+          r.`name` `name`,
+          r.description description,
+          r.admin_count adminCount,
+          r.create_time createTime,
+          r.status status,
+          r.sort sort
+        from
+          ums_role r
+            left join ums_admin_role_relation uar on  r.id = uar.role_id
+        where uar.admin_id = #{adminId}
+    </select>
 
 </mapper>

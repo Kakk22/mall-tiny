@@ -11,8 +11,10 @@ import com.cyf.malltiny.domain.AdminUserDetails;
 import com.cyf.malltiny.modules.ums.dto.UmsAdminLoginParam;
 import com.cyf.malltiny.modules.ums.mapper.UmsAdminMapper;
 import com.cyf.malltiny.modules.ums.mapper.UmsResourceMapper;
+import com.cyf.malltiny.modules.ums.mapper.UmsRoleMapper;
 import com.cyf.malltiny.modules.ums.model.UmsAdmin;
 import com.cyf.malltiny.modules.ums.model.UmsResource;
+import com.cyf.malltiny.modules.ums.model.UmsRole;
 import com.cyf.malltiny.modules.ums.service.UmsAdminService;
 import com.cyf.malltiny.security.util.JwtTokenUtil;
 import lombok.AllArgsConstructor;
@@ -49,6 +51,13 @@ public class UmsAdminServiceImpl extends ServiceImpl<UmsAdminMapper, UmsAdmin> i
     private PasswordEncoder passwordEncoder;
 
     private JwtTokenUtil jwtTokenUtil;
+
+    private UmsRoleMapper umsRoleMapper;
+
+    @Override
+    public List<UmsRole> getRoleList(Long adminId) {
+        return umsRoleMapper.getRoleList(adminId);
+    }
 
     /**
      * 根据姓名或用户名查询列表
