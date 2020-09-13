@@ -9,10 +9,12 @@ import com.cyf.malltiny.common.exception.Asserts;
 import com.cyf.malltiny.common.service.RedisService;
 import com.cyf.malltiny.domain.AdminUserDetails;
 import com.cyf.malltiny.modules.ums.dto.UmsAdminLoginParam;
+import com.cyf.malltiny.modules.ums.mapper.UmsAdminLoginLogMapper;
 import com.cyf.malltiny.modules.ums.mapper.UmsAdminMapper;
 import com.cyf.malltiny.modules.ums.mapper.UmsResourceMapper;
 import com.cyf.malltiny.modules.ums.mapper.UmsRoleMapper;
 import com.cyf.malltiny.modules.ums.model.UmsAdmin;
+import com.cyf.malltiny.modules.ums.model.UmsAdminLoginLog;
 import com.cyf.malltiny.modules.ums.model.UmsResource;
 import com.cyf.malltiny.modules.ums.model.UmsRole;
 import com.cyf.malltiny.modules.ums.service.UmsAdminService;
@@ -27,7 +29,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -53,6 +60,8 @@ public class UmsAdminServiceImpl extends ServiceImpl<UmsAdminMapper, UmsAdmin> i
     private JwtTokenUtil jwtTokenUtil;
 
     private UmsRoleMapper umsRoleMapper;
+
+    private UmsAdminLoginLogMapper umsAdminLoginLogMapper;
 
     @Override
     public List<UmsRole> getRoleList(Long adminId) {
@@ -131,11 +140,29 @@ public class UmsAdminServiceImpl extends ServiceImpl<UmsAdminMapper, UmsAdmin> i
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 token = jwtTokenUtil.generateToken(userDetails);
                 // TODO: 2020/9/13 插入用户登录信息
+                insertLoginLog(param.getUsername());
+                log.info("insertLoginLog");
             }
         } catch (AuthenticationException e) {
             log.warn("登录异常：{}",e.getMessage());
         }
         return token;
+    }
+
+    /**
+     * 添加登录记录
+     */
+    private void insertLoginLog(String username) {
+        UmsAdmin user = getUserByUsername(username);
+        if (user == null) return;
+        UmsAdminLoginLog log = new UmsAdminLoginLog();
+        log.setCreateTime(new Date());
+        log.setAdminId(user.getId());
+        ServletRequestAttributes attributes = (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = attributes.getRequest();
+        String addr = request.getRemoteAddr();
+        log.setIp(addr);
+        umsAdminLoginLogMapper.insert(log);
     }
 
     /**
