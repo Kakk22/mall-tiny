@@ -61,6 +61,31 @@ public class UmsAdminServiceImpl extends ServiceImpl<UmsAdminMapper, UmsAdmin> i
 
     private UmsAdminLoginLogMapper umsAdminLoginLogMapper;
 
+    /**
+     * 修改账号信息
+     * @param id
+     * @param admin
+     * @return
+     */
+    @Override
+    public boolean update(Long id, UmsAdmin admin) {
+        admin.setId(id);
+        UmsAdmin rawAdmin = getById(id);
+        if (rawAdmin.getPassword().equals(admin.getPassword())){
+            //与原加密密码相同的不需要修改
+            admin.setPassword(null);
+        }else {
+            //与原加密密码不同的需要加密修改
+            if (StringUtils.isEmpty(rawAdmin.getPassword())){
+                admin.setPassword(null);
+            }else {
+                admin.setPassword(passwordEncoder.encode(admin.getPassword()));
+            }
+        }
+        boolean result = updateById(admin);
+        return result;
+    }
+
     @Override
     public List<UmsRole> getRoleList(Long adminId) {
         return umsRoleMapper.getRoleList(adminId);

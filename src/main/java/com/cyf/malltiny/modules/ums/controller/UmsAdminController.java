@@ -1,6 +1,7 @@
 package com.cyf.malltiny.modules.ums.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cyf.malltiny.common.api.CommonPage;
 import com.cyf.malltiny.common.api.CommonResult;
@@ -26,7 +27,7 @@ import java.util.List;
  * @author cyf
  * @since 2020-09-13
  */
-@Api(tags = "UmsAdminController",description = "后台用户管理")
+@Api(tags = "UmsAdminController", description = "后台用户管理")
 @RestController
 @RequestMapping("/admin")
 public class UmsAdminController {
@@ -37,14 +38,14 @@ public class UmsAdminController {
 
     @ApiOperation("登录")
     @PostMapping(value = "/login")
-    public CommonResult login(@Validated @RequestBody UmsAdminLoginParam param){
+    public CommonResult login(@Validated @RequestBody UmsAdminLoginParam param) {
         String token = umsAdminService.login(param);
-        if (token == null){
+        if (token == null) {
             return CommonResult.failed("账号密码错误");
         }
-        HashMap<String,String> map = new HashMap<>(2);
-        map.put("token",token);
-        map.put("tokenHead",tokenHead);
+        HashMap<String, String> map = new HashMap<>(2);
+        map.put("token", token);
+        map.put("tokenHead", tokenHead);
         return CommonResult.success(map);
     }
 
@@ -52,16 +53,32 @@ public class UmsAdminController {
     @GetMapping(value = "/list")
     public CommonResult list(String keyword,
                              @RequestParam(defaultValue = "5") Integer pageSize,
-                             @RequestParam(defaultValue = "1") Integer pageNum){
+                             @RequestParam(defaultValue = "1") Integer pageNum) {
         Page<UmsAdmin> list = umsAdminService.list(keyword, pageSize, pageNum);
-        return  CommonResult.success(CommonPage.restPage(list));
+        return CommonResult.success(CommonPage.restPage(list));
     }
 
     @ApiOperation("查询用户角色")
     @GetMapping(value = "/role/{adminId}")
-    public CommonResult role(@PathVariable Long adminId){
+    public CommonResult role(@PathVariable Long adminId) {
         List<UmsRole> roleList = umsAdminService.getRoleList(adminId);
         return CommonResult.success(roleList);
+    }
+
+    @ApiOperation("获取指定用户信息")
+    @GetMapping(value = "/admin/{adminId}")
+    public CommonResult getItem(@PathVariable Long adminId) {
+        UmsAdmin admin = umsAdminService.getById(adminId);
+        return CommonResult.success(admin);
+    }
+
+    @ApiOperation("修改账号状态")
+    @PostMapping(value = "/admin/updateStatus/{id}")
+    public CommonResult updateStatus(@PathVariable Long id, @RequestParam Integer status) {
+        UmsAdmin umsAdmin = new UmsAdmin();
+        umsAdmin.setStatus(status);
+        boolean result = umsAdminService.update(id, umsAdmin);
+        return CommonResult.success(result);
     }
 }
 

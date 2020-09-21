@@ -63,5 +63,14 @@ public interface UmsAdminService extends IService<UmsAdmin> {
      * @param adminId 用户id
      * @return 资源列表
      */
-    List<UmsResource> getResources(@Param("adminId") Long adminId);
+    List<UmsResource> getResources(Long adminId);
+
+    /**
+     * 修改账号信息
+     * @param id
+     * @param admin
+     * @return
+     */
+    boolean update(Long id,UmsAdmin admin);
+
 }
