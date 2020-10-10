@@ -8,14 +8,9 @@ import com.cyf.malltiny.common.exception.Asserts;
 import com.cyf.malltiny.common.service.RedisService;
 import com.cyf.malltiny.domain.AdminUserDetails;
 import com.cyf.malltiny.modules.ums.dto.UmsAdminLoginParam;
-import com.cyf.malltiny.modules.ums.mapper.UmsAdminLoginLogMapper;
-import com.cyf.malltiny.modules.ums.mapper.UmsAdminMapper;
-import com.cyf.malltiny.modules.ums.mapper.UmsResourceMapper;
-import com.cyf.malltiny.modules.ums.mapper.UmsRoleMapper;
-import com.cyf.malltiny.modules.ums.model.UmsAdmin;
-import com.cyf.malltiny.modules.ums.model.UmsAdminLoginLog;
-import com.cyf.malltiny.modules.ums.model.UmsResource;
-import com.cyf.malltiny.modules.ums.model.UmsRole;
+import com.cyf.malltiny.modules.ums.mapper.*;
+import com.cyf.malltiny.modules.ums.model.*;
+import com.cyf.malltiny.modules.ums.service.UmsAdminRoleRelationService;
 import com.cyf.malltiny.modules.ums.service.UmsAdminService;
 import com.cyf.malltiny.security.util.JwtTokenUtil;
 import lombok.AllArgsConstructor;
@@ -32,6 +27,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -60,6 +56,8 @@ public class UmsAdminServiceImpl extends ServiceImpl<UmsAdminMapper, UmsAdmin> i
     private UmsRoleMapper umsRoleMapper;
 
     private UmsAdminLoginLogMapper umsAdminLoginLogMapper;
+
+    private UmsAdminRoleRelationService umsAdminRoleRelationService;
 
     /**
      * 修改账号信息
@@ -162,7 +160,6 @@ public class UmsAdminServiceImpl extends ServiceImpl<UmsAdminMapper, UmsAdmin> i
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 token = jwtTokenUtil.generateToken(userDetails);
-                // TODO: 2020/9/13 插入用户登录信息
                 insertLoginLog(param.getUsername());
                 log.info("insertLoginLog");
             }
@@ -203,5 +200,41 @@ public class UmsAdminServiceImpl extends ServiceImpl<UmsAdminMapper, UmsAdmin> i
         } else {
             throw new UsernameNotFoundException("用户名或密码错误");
         }
+    }
+
+    /**
+     * 刷新token
+     * @param token 旧token
+     * @return
+     */
+    @Override
+    public String refreshToken(String token) {
+        return jwtTokenUtil.refreshHeadToken(token);
+    }
+
+    /**
+     * 给用户分配角色
+     * @param adminId 用户id
+     * @param roleIds 角色id列表
+     */
+    @Override
+    public int updateRole(Long adminId, List<Long> roleIds) {
+        int count = roleIds == null ? 0 : roleIds.size();
+        //删除用户角色
+        QueryWrapper<UmsAdminRoleRelation> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(UmsAdminRoleRelation::getAdminId,adminId);
+        umsAdminRoleRelationService.remove(queryWrapper);
+        //插入新关系
+        if (!CollectionUtil.isEmpty(roleIds)){
+            List<UmsAdminRoleRelation> list = new ArrayList<>();
+            for (Long roleId : roleIds) {
+                UmsAdminRoleRelation umsAdminRoleRelation = new UmsAdminRoleRelation();
+                umsAdminRoleRelation.setAdminId(adminId);
+                umsAdminRoleRelation.setRoleId(roleId);
+                list.add(umsAdminRoleRelation);
+            }
+            umsAdminRoleRelationService.saveBatch(list);
+        }
+        return count;
     }
 }

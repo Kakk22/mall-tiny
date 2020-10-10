@@ -73,4 +73,18 @@ public interface UmsAdminService extends IService<UmsAdmin> {
      */
     boolean update(Long id,UmsAdmin admin);
 
+    /**
+     * 刷新token
+     * @param token 旧token
+     * @return 新token
+     */
+    String refreshToken(String token);
+
+    /**
+     * 给用户分配角色
+     * @param adminId 用户id
+     * @param roleIds 角色id列表
+     * @return 操作条数
+     */
+    int updateRole(Long adminId, List<Long> roleIds);
 }

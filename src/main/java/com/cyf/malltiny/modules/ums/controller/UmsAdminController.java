@@ -1,7 +1,6 @@
 package com.cyf.malltiny.modules.ums.controller;
 
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cyf.malltiny.common.api.CommonPage;
 import com.cyf.malltiny.common.api.CommonResult;
@@ -16,8 +15,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -35,6 +36,8 @@ public class UmsAdminController {
     private UmsAdminService umsAdminService;
     @Value("${jwt.tokenHead}")
     private String tokenHead;
+    @Value("${jwt.tokenHeader}")
+    private String tokenHeader;
 
     @ApiOperation("登录")
     @PostMapping(value = "/login")
@@ -66,7 +69,7 @@ public class UmsAdminController {
     }
 
     @ApiOperation("获取指定用户信息")
-    @GetMapping(value = "/admin/{adminId}")
+    @GetMapping(value = "/{adminId}")
     public CommonResult getItem(@PathVariable Long adminId) {
         UmsAdmin admin = umsAdminService.getById(adminId);
         return CommonResult.success(admin);
@@ -79,6 +82,25 @@ public class UmsAdminController {
         umsAdmin.setStatus(status);
         boolean result = umsAdminService.update(id, umsAdmin);
         return CommonResult.success(result);
+    }
+
+    @ApiOperation("刷新token")
+    @GetMapping(value = "/refreshToken")
+    public CommonResult refreshToken(HttpServletRequest request){
+        String token = request.getHeader(tokenHeader);
+        String result = umsAdminService.refreshToken(token);
+        Map<String,String> map = new HashMap<>(2);
+        map.put("token",result);
+        map.put("tokenHead",tokenHead);
+        return CommonResult.success(map);
+    }
+
+    @ApiOperation("给用户分配角色")
+    @PostMapping(value = "/role/update")
+    public CommonResult updateRole(@RequestParam(value = "adminId") Long adminId,
+                                   @RequestParam(value = "roleIds") List<Long> roleIds){
+        int i = umsAdminService.updateRole(adminId, roleIds);
+        return i > 0 ? CommonResult.success(i) : CommonResult.failed();
     }
 }
 
